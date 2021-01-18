@@ -1,0 +1,18 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@deps//:requirements.bzl", "requirement")
+
+py_binary(
+    name = "main-bin",
+    srcs = glob(["*.py"]),
+    data = ["@odict//bridge:shared"],
+    main = "main.py",
+    deps = [
+        requirement("requests"),
+        "@odict//python",
+    ],
+)
+
+alias(
+    name = "main",
+    actual = "//:main-bin",
+)
