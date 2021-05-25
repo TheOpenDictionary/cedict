@@ -24,6 +24,7 @@ with TemporaryDirectory() as dirpath:
         root = Element('dictionary')
 
         root.attrib["name"] = "CC-CEDICT"
+        entries = {}
 
         while True:
             line = g.readline().decode('utf-8')
@@ -41,13 +42,13 @@ with TemporaryDirectory() as dirpath:
 
                 print("Processing word %s..." % simplified)
 
-                entry = Element(
+                entry = entries.get(simplified, Element(
                     "entry",
                     attrib={
                         'term': simplified,
-                        'pronunciation': pronunciation
+                        'pronunciation': pronunciation,
                     }
-                )
+                ))
 
                 ety = Element("ety")
                 usage = Element("usage")
@@ -59,12 +60,17 @@ with TemporaryDirectory() as dirpath:
 
                 ety.append(usage)
                 entry.append(ety)
-                root.append(entry)
+
+                entries[simplified] = entry
 
         g.close()
 
         print("Writing to \"cedict.odict\"...")
 
-        Dictionary.write(tostring(root).decode('utf-8'), "cedict.odict")
+        [root.append(e) for e in entries.values()]
+
+        xml = tostring(root).decode('utf-8')
+
+        Dictionary.write(xml, "cedict.odict")
     except Exception as e:
         print(e)
